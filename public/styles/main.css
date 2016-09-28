@@ -1,0 +1,12 @@
+.input-group {
+  padding: 1em;
+}
+section {
+  margin: 0 auto;
+  width: 80%;
+}
+footer {
+  border-top: 1px #ECECEC solid;
+  margin: 1em;
+  padding: 0.5em;
+}
