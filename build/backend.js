@@ -104,6 +104,7 @@ var _isURL2 = _interopRequireDefault(_isURL);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var initialSeq = 1000;
 var maxKeyLength = 7;
 var redis_ds_URL = 'ds_URL';
 var redis_ds_COUNT = 'ds_COUNT';
@@ -144,29 +145,30 @@ function saveUrl(url, fn) {
   // http://stackoverflow.com/questions/29757935/redis-using-incr-value-in-a-transaction
 
   doUpdate();
+
   function doUpdate() {
+    var key = void 0;
+    var compositeKey = void 0;
+
     client.watch(redis_ds_COUNT);
     client.get(redis_ds_COUNT, function (err, count) {
       if (err) {
         process.nextTick(doUpdate);
       } else {
-        (function () {
-          // Force this to 1,000 if count is undefined?
-          // http://stackoverflow.com/questions/9542726/is-it-possible-to-base-36-encode-with-javascript-jquery
-          var key = ((count || 1000) + 1).toString(36);
-          var compositeKey = redis_ds_URL + ':' + key;
-          console.log(compositeKey);
-          console.log(key);
-          client.multi().incr(redis_ds_COUNT).lpush(redis_ds_RECENT, url).set(compositeKey, url).exec(function (err, reply) {
-            // Will return null if WATCH fails
-            // http://redis.io/commands/exec
-            if (typeof reply == 'null') {
-              process.nextTick(doUpdate);
-            } else {
-              fn(key, reply);
-            }
-          });
-        })();
+        // Force this to 1,000 if count is undefined?
+        // http://stackoverflow.com/questions/9542726/is-it-possible-to-base-36-encode-with-javascript-jquery
+        key = ((count || initialSeq) + 1).toString(36);
+        compositeKey = redis_ds_URL + ':' + key;
+
+        client.multi().incr(redis_ds_COUNT).lpush(redis_ds_RECENT, url).set(compositeKey, url).exec(function (err, reply) {
+          // Will return null if WATCH fails
+          // http://redis.io/commands/exec
+          if (typeof reply == 'null') {
+            process.nextTick(doUpdate);
+          } else {
+            fn(key, reply);
+          }
+        });
       }
     });
   }
@@ -312,9 +314,10 @@ var _urlModel2 = _interopRequireDefault(_urlModel);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// This will need a specific string for heroku
 // var client = require('redis').createClient(process.env.REDIS_URL);
-var client = _redis2.default.createClient();
+//const redisUrl = process.env.REDIS_URL || '';
+var redisUrl = 'redis://h:p8r539ccc7j9dn3r76ajuv84agr@ec2-23-23-156-130.compute-1.amazonaws.com:22419';
+var client = _redis2.default.createClient(redisUrl);
 var model = (0, _urlModel2.default)({ client: client });
 
 // For testing:
@@ -398,6 +401,7 @@ router.post('/save', function (req, res) {
     return;
   }
   model.saveUrl(url, function (v) {
+    // error handling for null value is missing
     res.status(200).json({
       key: v,
       shortUrl: 'http://localhost:3100/' + v
