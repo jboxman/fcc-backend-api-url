@@ -13,6 +13,6 @@ $(function() {
       },
       // Bad news
       failure: function() {}
-    })
+    });
   });
 });

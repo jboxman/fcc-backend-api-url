@@ -7,22 +7,22 @@ User Story: If I pass an invalid URL that doesn't follow the valid http://www.ex
 
 User Story: When I visit that shortened URL, it will redirect me to my original link.
 
-Files
------
-
-What files should I have in every single express app backend?
-
-- .editorconfig
-- .gitignore
-- package.json
-- devServer.js (babel-register)
-- Procfile
-- .eslintrc
-- webpack.config.js
-
 TODO
 ----
 
+* Determine FQDN for development, local, and production
+* Add clipboard.js
 * Configure eslint
-* 
+
+API
+----
+
+curl -H"Content-Type: application/json" \
+  -X POST -d '{"url":"http://example.com"}' \
+    http://localhost:3100/api/save
+
+Heroku
+------
+
+ * fathomless-woodland-80063
 
