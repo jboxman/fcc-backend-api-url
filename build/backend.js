@@ -182,9 +182,11 @@ function getUrl(key, fn) {
   var id = parseInt(key.length > maxKeyLength ? '^' : key, 36);
   if (isNaN(id)) {
     fn(null);
+    return;
   }
 
   client.get(redis_ds_URL + ':' + key, function (err, reply) {
+    // May be null
     fn(reply);
   });
 }
@@ -316,6 +318,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 // var client = require('redis').createClient(process.env.REDIS_URL);
 //const redisUrl = process.env.REDIS_URL || '';
+console.log(process.env);
 var redisUrl = 'redis://h:p8r539ccc7j9dn3r76ajuv84agr@ec2-23-23-156-130.compute-1.amazonaws.com:22419';
 var client = _redis2.default.createClient(redisUrl);
 var model = (0, _urlModel2.default)({ client: client });
@@ -462,6 +465,7 @@ router.get('/:key', function (_ref, res) {
     return;
   }
   model.getUrl(key, function (v) {
+    // Add null handling
     res.redirect(v);
   });
 });
